@@ -158,7 +158,8 @@ export default function LogModal({ onClose, onSave }) {
             </>
           )}
 
-          {/* Nutrition-specific */}
+          {/* Nutrition-specific: protein/fueling toggles serve as the completion signal;
+              done=true is set automatically in handleSave form state */}
           {type === 'nutrition' && (
             <div className="space-y-3">
               <button
