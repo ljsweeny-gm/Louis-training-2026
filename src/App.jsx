@@ -6,6 +6,9 @@ import { MOCK_LOGS, MOCK_BENCHMARKS } from './data/mockLogs'
 import LogModal from './components/LogModal'
 import SummaryDashboard from './components/SummaryDashboard'
 import RuckingDetail from './components/RuckingDetail'
+import StrengthDetail from './components/StrengthDetail'
+import BodyControlDetail from './components/BodyControlDetail'
+import NutritionDetail from './components/NutritionDetail'
 
 export default function App() {
   const [logModalOpen, setLogModalOpen] = useState(false)
@@ -25,13 +28,13 @@ export default function App() {
           <RuckingDetail logs={allLogs} benchmarks={MOCK_BENCHMARKS} />
         </Section>
         <Section id="strength" title="Strength">
-          <p className="text-gray-500">Strength detail coming soon</p>
+          <StrengthDetail logs={allLogs} />
         </Section>
         <Section id="body-control" title="Body Control">
-          <p className="text-gray-500">Body control detail coming soon</p>
+          <BodyControlDetail logs={allLogs} />
         </Section>
         <Section id="nutrition" title="Nutrition">
-          <p className="text-gray-500">Nutrition detail coming soon</p>
+          <NutritionDetail logs={allLogs} />
         </Section>
       </main>
       {logModalOpen && (
