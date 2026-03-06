@@ -3,6 +3,7 @@ import NavBar from './components/NavBar'
 import Section from './components/Section'
 import { useLogs } from './hooks/useLogs'
 import { MOCK_LOGS, MOCK_BENCHMARKS } from './data/mockLogs'
+import LogModal from './components/LogModal'
 
 export default function App() {
   const [logModalOpen, setLogModalOpen] = useState(false)
@@ -32,12 +33,10 @@ export default function App() {
         </Section>
       </main>
       {logModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
-            <p className="text-gray-500">Log modal coming soon</p>
-            <button onClick={() => setLogModalOpen(false)} className="mt-4 text-sm text-gray-400 hover:text-gray-700">Close</button>
-          </div>
-        </div>
+        <LogModal
+          onClose={() => setLogModalOpen(false)}
+          onSave={addLog}
+        />
       )}
     </div>
   )
