@@ -5,6 +5,7 @@ import { useLogs } from './hooks/useLogs'
 import { MOCK_LOGS, MOCK_BENCHMARKS } from './data/mockLogs'
 import LogModal from './components/LogModal'
 import SummaryDashboard from './components/SummaryDashboard'
+import RuckingDetail from './components/RuckingDetail'
 
 export default function App() {
   const [logModalOpen, setLogModalOpen] = useState(false)
@@ -21,7 +22,7 @@ export default function App() {
           <SummaryDashboard logs={allLogs} benchmarks={MOCK_BENCHMARKS} />
         </Section>
         <Section id="rucking" title="Rucking">
-          <p className="text-gray-500">Rucking detail coming soon</p>
+          <RuckingDetail logs={allLogs} benchmarks={MOCK_BENCHMARKS} />
         </Section>
         <Section id="strength" title="Strength">
           <p className="text-gray-500">Strength detail coming soon</p>
