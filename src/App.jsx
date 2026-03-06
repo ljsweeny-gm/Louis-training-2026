@@ -9,13 +9,15 @@ import RuckingDetail from './components/RuckingDetail'
 import StrengthDetail from './components/StrengthDetail'
 import BodyControlDetail from './components/BodyControlDetail'
 import NutritionDetail from './components/NutritionDetail'
+import CSVUpload from './components/CSVUpload'
 
 export default function App() {
   const [logModalOpen, setLogModalOpen] = useState(false)
   const { logs, addLog, deleteLog } = useLogs()
+  const [csvLogs, setCsvLogs] = useState([])
 
   // Merge localStorage logs with mock data for prototype
-  const allLogs = [...MOCK_LOGS, ...logs]
+  const allLogs = [...MOCK_LOGS, ...logs, ...csvLogs]
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -23,6 +25,9 @@ export default function App() {
       <main>
         <Section id="summary" title="Summary">
           <SummaryDashboard logs={allLogs} benchmarks={MOCK_BENCHMARKS} />
+          <div className="mt-6">
+            <CSVUpload onImport={newLogs => setCsvLogs(prev => [...prev, ...newLogs])} />
+          </div>
         </Section>
         <Section id="rucking" title="Rucking">
           <RuckingDetail logs={allLogs} benchmarks={MOCK_BENCHMARKS} />
