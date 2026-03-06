@@ -4,6 +4,7 @@ import Section from './components/Section'
 import { useLogs } from './hooks/useLogs'
 import { MOCK_LOGS, MOCK_BENCHMARKS } from './data/mockLogs'
 import LogModal from './components/LogModal'
+import SummaryDashboard from './components/SummaryDashboard'
 
 export default function App() {
   const [logModalOpen, setLogModalOpen] = useState(false)
@@ -17,7 +18,7 @@ export default function App() {
       <NavBar onLogClick={() => setLogModalOpen(true)} />
       <main>
         <Section id="summary" title="Summary">
-          <p className="text-gray-500">Summary dashboard coming soon</p>
+          <SummaryDashboard logs={allLogs} benchmarks={MOCK_BENCHMARKS} />
         </Section>
         <Section id="rucking" title="Rucking">
           <p className="text-gray-500">Rucking detail coming soon</p>
