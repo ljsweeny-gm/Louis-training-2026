@@ -5,7 +5,6 @@ const ACTIVITY_TYPES = [
   { value: 'ruck', label: 'Ruck', color: 'bg-orange-100 border-orange-400 text-orange-800' },
   { value: 'strength', label: 'Strength', color: 'bg-blue-100 border-blue-400 text-blue-800' },
   { value: 'yoga', label: 'Yoga', color: 'bg-purple-100 border-purple-400 text-purple-800' },
-  { value: 'qigong', label: 'Qigong', color: 'bg-teal-100 border-teal-400 text-teal-800' },
   { value: 'nutrition', label: 'Nutrition', color: 'bg-green-100 border-green-400 text-green-800' },
 ]
 

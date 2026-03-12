@@ -7,14 +7,14 @@ function groupByWeek(logs, types) {
     const monday = new Date(d)
     monday.setDate(d.getDate() - (d.getDay() === 0 ? 6 : d.getDay() - 1))
     const key = monday.toISOString().slice(5, 10)
-    if (!weeks[key]) weeks[key] = { week: key, yoga: 0, qigong: 0 }
+    if (!weeks[key]) weeks[key] = { week: key, yoga: 0 }
     weeks[key][l.type]++
   })
   return Object.values(weeks).sort((a, b) => a.week.localeCompare(b.week))
 }
 
 export default function BodyControlDetail({ logs }) {
-  const weeklyData = groupByWeek(logs, ['yoga', 'qigong'])
+  const weeklyData = groupByWeek(logs, ['yoga'])
 
   return (
     <div className="space-y-8">
@@ -29,11 +29,10 @@ export default function BodyControlDetail({ logs }) {
               <Tooltip />
               <Legend />
               <Bar dataKey="yoga" fill="#a855f7" radius={[4, 4, 0, 0]} name="Yoga" />
-              <Bar dataKey="qigong" fill="#14b8a6" radius={[4, 4, 0, 0]} name="Qigong" />
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <p className="text-xs text-gray-400 mt-2">Targets: Yoga 2–3x/week · Qigong daily</p>
+        <p className="text-xs text-gray-400 mt-2">Target: Yoga 2x/week</p>
       </div>
     </div>
   )

@@ -53,7 +53,7 @@ describe('useLogs', () => {
   it('deletes a log entry', () => {
     const { result } = renderHook(() => useLogs())
     act(() => {
-      result.current.addLog({ date: '2026-03-06', type: 'qigong', done: true, rpe: null, experience: 4, notes: '', duration_min: 10 })
+      result.current.addLog({ date: '2026-03-06', type: 'nutrition', done: true, rpe: null, experience: 4, notes: '', duration_min: 0 })
     })
     const id = result.current.logs[0].id
     act(() => {
