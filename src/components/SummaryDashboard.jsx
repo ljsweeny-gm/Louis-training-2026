@@ -1,4 +1,4 @@
-import { currentWeekLogs, totalMinutes, weeklyFidelity } from '../utils/stats'
+import { currentWeekLogs, previousWeekLogs, totalMinutes, weeklyFidelity } from '../utils/stats'
 
 const TARGETS = {
   ruck: 2,
@@ -27,28 +27,57 @@ function fidelityColor(completed, target) {
 
 function getDayLabels(logs, type) {
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-  const days = new Set()
+  const days = []
   logs
     .filter(l => l.type === type && l.done)
     .forEach(l => {
       const dateStr = typeof l.date === 'string' ? l.date.split('T')[0] : l.date
-      const date = new Date(dateStr)
-      days.add(dayNames[date.getDay()])
+      const [y, m, d] = dateStr.split('-').map(Number)
+      const date = new Date(y, m - 1, d)
+      const name = dayNames[date.getDay()]
+      if (!days.includes(name)) days.push(name)
     })
-  return Array.from(days).join(', ') || 'none'
+  return days.join(', ') || 'none'
+}
+
+function getWeekStart() {
+  const now = new Date()
+  const dayOfWeek = now.getDay()
+  const monday = new Date(now)
+  monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+  return monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+function getNextBenchmark(benchmarks) {
+  if (!benchmarks.length) return null
+  const now = new Date()
+  const future = benchmarks
+    .filter(b => new Date(b.date) >= now)
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+  if (future.length) return future[0]
+  return benchmarks.sort((a, b) => new Date(b.date) - new Date(a.date))[0]
+}
+
+function formatBenchmarkDate(dateStr) {
+  const d = typeof dateStr === 'string' ? dateStr.split('T')[0] : dateStr
+  const [y, m, day] = d.split('-').map(Number)
+  const date = new Date(y, m - 1, day)
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
 export default function SummaryDashboard({ logs, benchmarks = [] }) {
   const weekLogs = currentWeekLogs(logs)
+  const prevWeekLogs = previousWeekLogs(logs)
   const totalMins = totalMinutes(weekLogs)
   const phaseMins = totalMinutes(logs)
+  const nextBm = getNextBenchmark(benchmarks)
 
   return (
     <div className="space-y-6">
       {/* Top stats */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">This Week</p>
+          <p className="text-xs text-gray-500 uppercase tracking-wide">This Week ({getWeekStart()})</p>
           <p className="text-3xl font-bold text-gray-800 mt-1">{Math.round(totalMins / 60 * 10) / 10}<span className="text-base font-normal text-gray-500 ml-1">hrs</span></p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl p-4">
@@ -57,28 +86,49 @@ export default function SummaryDashboard({ logs, benchmarks = [] }) {
         </div>
       </div>
 
-      {/* Week activity summary */}
+      {/* Week comparison table */}
       <div className="bg-white border border-gray-200 rounded-xl p-3">
-        <p className="text-xs text-gray-500 uppercase tracking-wide mb-3 font-medium">This Week</p>
-        <div className="space-y-2">
-          {PILLAR_CONFIG.map(pillar => {
-            const { completed, target } = weeklyFidelity(weekLogs, pillar.key, TARGETS[pillar.key])
-            const days = getDayLabels(weekLogs, pillar.key)
-            return (
-              <div key={pillar.key} className="flex items-center justify-between text-sm">
-                <span className="text-gray-700 font-medium">{pillar.emoji} {pillar.label}</span>
-                <span className="text-gray-600">{completed}/{target} ({days})</span>
-              </div>
-            )
-          })}
-        </div>
+        <p className="text-xs text-gray-500 uppercase tracking-wide mb-2 font-medium">Week Comparison</p>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b">
+              <th className="text-left py-1 px-2 font-medium text-gray-700">Pillar</th>
+              <th className="text-center py-1 px-2 font-medium text-gray-700">This Week</th>
+              <th className="text-center py-1 px-2 font-medium text-gray-700">Last Week</th>
+            </tr>
+          </thead>
+          <tbody>
+            {PILLAR_CONFIG.map(pillar => {
+              const curr = weeklyFidelity(weekLogs, pillar.key, TARGETS[pillar.key])
+              const prev = weeklyFidelity(prevWeekLogs, pillar.key, TARGETS[pillar.key])
+              const currDays = getDayLabels(weekLogs, pillar.key)
+              return (
+                <tr key={pillar.key} className="border-b last:border-0">
+                  <td className="py-1 px-2 text-gray-700">{pillar.emoji} {pillar.label}</td>
+                  <td className="text-center py-1 px-2 text-gray-800 font-medium">{curr.completed}/{curr.target} ({currDays})</td>
+                  <td className="text-center py-1 px-2 text-gray-600">{prev.completed}/{prev.target}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
 
       {/* Next benchmark */}
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
         <p className="text-xs text-amber-700 uppercase tracking-wide font-medium">Next Benchmark</p>
-        <p className="text-gray-700 mt-1 font-medium">Mount Si — date TBD</p>
-        <p className="text-sm text-gray-500 mt-0.5">Last: Feb 25 · 10 lbs · 180 min · RPE 6</p>
+        {nextBm ? (
+          <>
+            <p className="text-gray-700 mt-1 font-medium">
+              {(nextBm.route || 'TBD').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase())} — {formatBenchmarkDate(nextBm.date)}
+            </p>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Last: {formatBenchmarkDate(nextBm.date)} · {nextBm.pack_weight_lbs} lbs · {nextBm.duration_min} min · RPE {nextBm.rpe}
+            </p>
+          </>
+        ) : (
+          <p className="text-gray-700 mt-1 font-medium">No benchmarks yet</p>
+        )}
       </div>
 
       {/* Pillar cards */}
