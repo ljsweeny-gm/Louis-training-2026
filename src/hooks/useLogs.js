@@ -1,33 +1,51 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
-const STORAGE_KEY = 'louis-training-logs'
+const API_URL = import.meta.env.VITE_SHEETS_API_URL
 
 function generateId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36)
 }
 
 export function useLogs() {
-  const [logs, setLogs] = useState(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      return stored ? JSON.parse(stored) : []
-    } catch {
-      return []
-    }
-  })
+  const [logs, setLogs] = useState([])
+  const [benchmarks, setBenchmarks] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(logs))
-  }, [logs])
+    if (!API_URL) {
+      setError('No API URL configured')
+      setLoading(false)
+      return
+    }
 
-  function addLog(entry) {
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(data => {
+        setLogs(data.logs || [])
+        setBenchmarks(data.benchmarks || [])
+      })
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const addLog = useCallback(async (entry) => {
     const newLog = { id: generateId(), ...entry }
     setLogs(prev => [...prev, newLog])
-  }
 
-  function deleteLog(id) {
+    try {
+      await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify(newLog),
+      })
+    } catch (err) {
+      console.error('Failed to save log:', err)
+    }
+  }, [])
+
+  const deleteLog = useCallback((id) => {
     setLogs(prev => prev.filter(log => log.id !== id))
-  }
+  }, [])
 
-  return { logs, addLog, deleteLog }
+  return { logs, benchmarks, loading, error, addLog, deleteLog }
 }
