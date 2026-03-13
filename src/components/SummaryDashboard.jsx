@@ -27,15 +27,19 @@ function fidelityColor(completed, target) {
 
 function getDayLabels(logs, type) {
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-  const days = new Set()
+  const dayIndices = new Set()
   logs
     .filter(l => l.type === type && l.done)
     .forEach(l => {
       const dateStr = typeof l.date === 'string' ? l.date.split('T')[0] : l.date
       const date = new Date(dateStr)
-      days.add(dayNames[date.getDay()])
+      dayIndices.add(date.getDay())
     })
-  return Array.from(days).join(', ') || 'none'
+  if (dayIndices.size === 0) return 'none'
+  return Array.from(dayIndices)
+    .sort((a, b) => a - b)
+    .map(i => dayNames[i])
+    .join(', ')
 }
 
 export default function SummaryDashboard({ logs, benchmarks = [] }) {
