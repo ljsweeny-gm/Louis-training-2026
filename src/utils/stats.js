@@ -4,9 +4,11 @@ function isDone(done) {
   return !!done
 }
 
+// Parse date string to local midnight (avoids UTC timezone shift)
 function parseDate(date) {
-  const dateStr = typeof date === 'string' ? date.split('T')[0] : date
-  return new Date(dateStr)
+  const dateStr = typeof date === 'string' ? date.split('T')[0] : String(date)
+  const [y, m, d] = dateStr.split('-').map(Number)
+  return new Date(y, m - 1, d)
 }
 
 export function totalMinutes(logs, type = null) {
@@ -20,11 +22,25 @@ export function weeklyFidelity(logs, type, target) {
   return { completed, target }
 }
 
+function getMondayOf(date) {
+  const d = new Date(date)
+  const dayOfWeek = d.getDay()
+  d.setDate(d.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
 export function currentWeekLogs(logs) {
-  const now = new Date()
-  const dayOfWeek = now.getDay()
-  const monday = new Date(now)
-  monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
-  monday.setHours(0, 0, 0, 0)
+  const monday = getMondayOf(new Date())
   return logs.filter(l => parseDate(l.date) >= monday)
+}
+
+export function previousWeekLogs(logs) {
+  const thisMonday = getMondayOf(new Date())
+  const lastMonday = new Date(thisMonday)
+  lastMonday.setDate(thisMonday.getDate() - 7)
+  return logs.filter(l => {
+    const d = parseDate(l.date)
+    return d >= lastMonday && d < thisMonday
+  })
 }
