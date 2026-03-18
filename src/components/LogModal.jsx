@@ -3,6 +3,7 @@ import FaceScale from './FaceScale'
 
 const ACTIVITY_TYPES = [
   { value: 'ruck', label: 'Ruck', color: 'bg-orange-100 border-orange-400 text-orange-800' },
+  { value: 'run', label: 'Run', color: 'bg-red-100 border-red-400 text-red-800' },
   { value: 'strength', label: 'Strength', color: 'bg-blue-100 border-blue-400 text-blue-800' },
   { value: 'yoga', label: 'Yoga', color: 'bg-purple-100 border-purple-400 text-purple-800' },
   { value: 'nutrition', label: 'Nutrition', color: 'bg-green-100 border-green-400 text-green-800' },
@@ -112,8 +113,8 @@ export default function LogModal({ onClose, onSave }) {
                 </div>
               </div>
 
-              {/* RPE — only for ruck and strength */}
-              {(type === 'ruck' || type === 'strength') && (
+              {/* RPE — only for ruck, run and strength */}
+              {(type === 'ruck' || type === 'run' || type === 'strength') && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Rate of Perceived Exertion: <span className="font-bold text-green-700">{form.rpe}</span>/10
@@ -136,6 +137,20 @@ export default function LogModal({ onClose, onSave }) {
                 <label className="block text-sm font-medium text-gray-700 mb-2">How was it?</label>
                 <FaceScale value={form.experience} onChange={v => update('experience', v)} />
               </div>
+
+              {/* Run-specific fields */}
+              {type === 'run' && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Distance (mi)</label>
+                    <input type="number" step="0.1" value={form.distance_miles} onChange={e => update('distance_miles', e.target.value)} placeholder="3.1" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Elevation (ft)</label>
+                    <input type="number" value={form.elevation_ft} onChange={e => update('elevation_ft', e.target.value)} placeholder="200" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                </div>
+              )}
 
               {/* Ruck-specific fields */}
               {type === 'ruck' && (

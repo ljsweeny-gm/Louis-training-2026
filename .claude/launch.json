@@ -5,7 +5,8 @@
       "name": "louis-training-2026",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "port": 5173
+      "port": 5173,
+      "cwd": "C:/Projects/Wells Fitness/Louis-training-2026"
     }
   ]
 }

@@ -9,6 +9,7 @@ function generateId() {
 export function useLogs() {
   const [logs, setLogs] = useState([])
   const [benchmarks, setBenchmarks] = useState([])
+  const [targets, setTargets] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -24,6 +25,7 @@ export function useLogs() {
       .then(data => {
         setLogs(data.logs || [])
         setBenchmarks(data.benchmarks || [])
+        setTargets(data.targets || [])
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
@@ -47,5 +49,5 @@ export function useLogs() {
     setLogs(prev => prev.filter(log => log.id !== id))
   }, [])
 
-  return { logs, benchmarks, loading, error, addLog, deleteLog }
+  return { logs, benchmarks, targets, loading, error, addLog, deleteLog }
 }

@@ -1,19 +1,15 @@
 import { currentWeekLogs, previousWeekLogs, totalMinutes, weeklyFidelity } from '../utils/stats'
 
-const TARGETS = {
-  ruck: 2,
-  strength: 2,
-  yoga: 2,
-}
-
 const PILLAR_CONFIG = [
   { key: 'ruck', label: 'Rucking', emoji: '🎒', color: 'orange' },
+  { key: 'run', label: 'Running', emoji: '👟', color: 'red' },
   { key: 'strength', label: 'Strength', emoji: '💪', color: 'blue' },
   { key: 'yoga', label: 'Yoga', emoji: '🧘', color: 'purple' },
 ]
 
 const COLOR_MAP = {
   orange: { card: 'bg-orange-50 border-orange-200', label: 'text-orange-700', bar: 'bg-orange-400' },
+  red: { card: 'bg-red-50 border-red-200', label: 'text-red-700', bar: 'bg-red-400' },
   blue: { card: 'bg-blue-50 border-blue-200', label: 'text-blue-700', bar: 'bg-blue-400' },
   purple: { card: 'bg-purple-50 border-purple-200', label: 'text-purple-700', bar: 'bg-purple-400' },
 }
@@ -68,7 +64,10 @@ function formatBenchmarkDate(dateStr) {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-export default function SummaryDashboard({ logs, benchmarks = [] }) {
+export default function SummaryDashboard({ logs, benchmarks = [], targets = [] }) {
+  const targetsMap = Object.fromEntries(targets.map(t => [t.type, Number(t.weekly_target)]))
+  const getTarget = (type) => targetsMap[type] ?? 2
+
   const weekLogs = currentWeekLogs(logs)
   const prevWeekLogs = previousWeekLogs(logs)
   const totalMins = totalMinutes(weekLogs)
@@ -102,8 +101,8 @@ export default function SummaryDashboard({ logs, benchmarks = [] }) {
           </thead>
           <tbody>
             {PILLAR_CONFIG.map(pillar => {
-              const curr = weeklyFidelity(weekLogs, pillar.key, TARGETS[pillar.key])
-              const prev = weeklyFidelity(prevWeekLogs, pillar.key, TARGETS[pillar.key])
+              const curr = weeklyFidelity(weekLogs, pillar.key, getTarget(pillar.key))
+              const prev = weeklyFidelity(prevWeekLogs, pillar.key, getTarget(pillar.key))
               const currDays = getDayLabels(weekLogs, pillar.key)
               return (
                 <tr key={pillar.key} className="border-b last:border-0">
@@ -137,7 +136,7 @@ export default function SummaryDashboard({ logs, benchmarks = [] }) {
       {/* Pillar cards */}
       <div className="grid grid-cols-2 gap-4">
         {PILLAR_CONFIG.map(pillar => {
-          const { completed, target } = weeklyFidelity(weekLogs, pillar.key, TARGETS[pillar.key])
+          const { completed, target } = weeklyFidelity(weekLogs, pillar.key, getTarget(pillar.key))
           const pct = Math.min(completed / target, 1)
           const c = COLOR_MAP[pillar.color]
           return (

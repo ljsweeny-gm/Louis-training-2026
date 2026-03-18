@@ -11,7 +11,7 @@ import NutritionDetail from './components/NutritionDetail'
 
 export default function App() {
   const [logModalOpen, setLogModalOpen] = useState(false)
-  const { logs, benchmarks, loading, error, addLog } = useLogs()
+  const { logs, benchmarks, targets, loading, error, addLog } = useLogs()
 
   if (loading) {
     return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-400">Loading training data...</div>
@@ -26,7 +26,7 @@ export default function App() {
       <NavBar onLogClick={() => setLogModalOpen(true)} />
       <main>
         <Section id="summary" title="Summary">
-          <SummaryDashboard logs={logs} benchmarks={benchmarks} />
+          <SummaryDashboard logs={logs} benchmarks={benchmarks} targets={targets} />
         </Section>
         <Section id="rucking" title="Rucking">
           <RuckingDetail logs={logs} benchmarks={benchmarks} />
