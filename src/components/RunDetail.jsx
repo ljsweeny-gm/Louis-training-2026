@@ -24,6 +24,18 @@ function formatTime(seconds) {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
+function smoothPace(data, windowSec = 20) {
+  return data.map((d, i) => {
+    if (!d.pace || d.pace > 20) return { ...d, pace: null }
+    const vals = []
+    for (let j = i; j >= 0; j--) {
+      if (data[i].t - data[j].t > windowSec) break
+      if (data[j].pace && data[j].pace <= 20) vals.push(data[j].pace)
+    }
+    return { ...d, pace: vals.length ? Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10 : null }
+  })
+}
+
 export default function RunDetail() {
   const [activities, setActivities] = useState([])
   const [loading, setLoading] = useState(true)
@@ -109,20 +121,28 @@ export default function RunDetail() {
 
           {streams && (
             <>
-              {/* HR chart */}
+              {/* HR + Pace overlay chart */}
               <div className="bg-white border border-gray-200 rounded-xl p-4">
-                <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-3">Heart Rate (bpm)</p>
-                <ResponsiveContainer width="100%" height={160}>
-                  <LineChart data={streams.chartData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
-                    <XAxis dataKey="t" hide />
-                    <YAxis domain={['auto', 'auto']} tick={{ fontSize: 11 }} />
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide font-medium">Heart Rate & Pace</p>
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-red-400" /> HR</span>
+                    <span className="flex items-center gap-1"><span className="inline-block w-3 h-0.5 bg-blue-400" /> Pace</span>
+                  </div>
+                </div>
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={smoothPace(streams.chartData, 60)} margin={{ top: 4, right: 40, bottom: 0, left: -20 }}>
+                    <XAxis dataKey="t" tick={{ fontSize: 10 }} tickFormatter={(s) => `${Math.floor(s / 60)}m`} interval="preserveStartEnd" />
+                    <YAxis yAxisId="hr" domain={['auto', 'auto']} tick={{ fontSize: 11 }} />
+                    <YAxis yAxisId="pace" orientation="right" reversed domain={['dataMin', 'dataMax']} tick={{ fontSize: 11 }} tickFormatter={formatPace} />
                     <Tooltip
-                      formatter={(v) => [`${Math.round(v)} bpm`, 'HR']}
-                      labelFormatter={() => ''}
+                      formatter={(v, name) => name === 'hr' ? [`${Math.round(v)} bpm`, 'HR'] : [formatPace(v), 'Pace']}
+                      labelFormatter={(s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`}
                     />
-                    <Line type="monotone" dataKey="hr" stroke="#f87171" dot={false} strokeWidth={1.5} connectNulls />
+                    <Line yAxisId="hr" type="monotone" dataKey="hr" stroke="#f87171" dot={false} strokeWidth={1.5} connectNulls />
+                    <Line yAxisId="pace" type="monotone" dataKey="pace" stroke="#93c5fd" dot={false} strokeWidth={1.5} strokeOpacity={0.6} connectNulls />
                     {streams.zones?.map((z, i) => (
-                      <ReferenceLine key={i} y={z.min} stroke={ZONE_COLORS[i]} strokeDasharray="3 3" strokeOpacity={0.5} />
+                      <ReferenceLine key={i} yAxisId="hr" y={z.min} stroke={ZONE_COLORS[i]} strokeDasharray="3 3" strokeOpacity={0.3} />
                     ))}
                   </LineChart>
                 </ResponsiveContainer>
@@ -145,22 +165,6 @@ export default function RunDetail() {
                     </div>
                   ))}
                 </div>
-              </div>
-
-              {/* Pace chart */}
-              <div className="bg-white border border-gray-200 rounded-xl p-4">
-                <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-3">Pace (min/mi)</p>
-                <ResponsiveContainer width="100%" height={120}>
-                  <LineChart data={streams.chartData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
-                    <XAxis dataKey="t" hide />
-                    <YAxis reversed domain={['auto', 'auto']} tick={{ fontSize: 11 }} tickFormatter={formatPace} />
-                    <Tooltip
-                      formatter={(v) => [formatPace(v), 'Pace']}
-                      labelFormatter={() => ''}
-                    />
-                    <Line type="monotone" dataKey="pace" stroke="#60a5fa" dot={false} strokeWidth={1.5} connectNulls />
-                  </LineChart>
-                </ResponsiveContainer>
               </div>
             </>
           )}
