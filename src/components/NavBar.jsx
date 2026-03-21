@@ -1,6 +1,7 @@
 export default function NavBar({ onLogClick }) {
   const links = [
     { href: '#summary', label: 'Summary' },
+    { href: '#running', label: 'Running' },
     { href: '#rucking', label: 'Rucking' },
     { href: '#strength', label: 'Strength' },
     { href: '#body-control', label: 'Body Control' },

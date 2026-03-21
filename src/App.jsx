@@ -8,6 +8,7 @@ import RuckingDetail from './components/RuckingDetail'
 import StrengthDetail from './components/StrengthDetail'
 import BodyControlDetail from './components/BodyControlDetail'
 import NutritionDetail from './components/NutritionDetail'
+import RunDetail from './components/RunDetail'
 
 export default function App() {
   const [logModalOpen, setLogModalOpen] = useState(false)
@@ -27,6 +28,9 @@ export default function App() {
       <main>
         <Section id="summary" title="Summary">
           <SummaryDashboard logs={logs} benchmarks={benchmarks} targets={targets} />
+        </Section>
+        <Section id="running" title="Running">
+          <RunDetail />
         </Section>
         <Section id="rucking" title="Rucking">
           <RuckingDetail logs={logs} benchmarks={benchmarks} />
